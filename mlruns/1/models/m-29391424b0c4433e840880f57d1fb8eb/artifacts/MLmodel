@@ -1,0 +1,23 @@
+artifact_path: /home/claude/rto-prediction/mlruns/1/models/m-29391424b0c4433e840880f57d1fb8eb/artifacts
+flavors:
+  lightgbm:
+    code: null
+    data: model.pkl
+    lgb_version: 4.6.0
+    model_class: lightgbm.sklearn.LGBMClassifier
+    serialization_format: cloudpickle
+    skops_trusted_types: null
+  python_function:
+    data: model.pkl
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.lightgbm
+    python_version: 3.12.3
+mlflow_version: 3.11.1
+model_id: m-29391424b0c4433e840880f57d1fb8eb
+model_size_bytes: 226109
+model_uuid: m-29391424b0c4433e840880f57d1fb8eb
+prompts: null
+run_id: 352540fa406b47489a32e9c29c51b8e5
+utc_time_created: '2026-04-30 06:48:42.112037'
