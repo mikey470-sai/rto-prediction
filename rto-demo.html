@@ -566,8 +566,22 @@
   <div class="prob-bar-bg"><div class="prob-bar" id="probBar" style="width:0%"></div></div>
   <div class="recommendation">
     <strong>💡 Recommendation</strong>
-    <span id="recText">—</span>
+   <span id="recText">—</span>
+  <div id="apiMetaRow" style="display:none;gap:8px;margin-top:14px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;text-align:center;">
+      <div id="metaConfidence" style="font-size:14px;font-weight:700;">—</div>
+      <div style="font-size:10px;color:var(--muted);">Confidence</div>
+    </div>
+    <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;text-align:center;">
+      <div id="metaLatency" style="font-size:14px;font-weight:700;">—</div>
+      <div style="font-size:10px;color:var(--muted);">Latency</div>
+    </div>
+    <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;text-align:center;">
+      <div id="metaFlag" style="font-size:14px;font-weight:700;">—</div>
+      <div style="font-size:10px;color:var(--muted);">RTO Flag</div>
+    </div>
   </div>
+</div>
 </div>
 
 <!-- Feature Breakdown -->
