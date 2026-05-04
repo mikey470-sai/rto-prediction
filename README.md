@@ -15,7 +15,7 @@
 | What | Link |
 |------|------|
 | ⚡ Live API | https://rto-prediction-production.up.railway.app/docs |
-| 🎨 Live Demo (https://mikey470-sai.github.io/rto-prediction/)|
+| 🎨 Live Demo | [Click Here](https://mikey470-sai.github.io/rto-prediction/) |
 | 📊 MLflow Dashboard | Run `mlflow ui` locally → http://localhost:5000 |
 | 🐙 GitHub Repo | https://github.com/mikey470-sai/rto-prediction |
 
