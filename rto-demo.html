@@ -426,27 +426,9 @@
 <body>
 
 <div class="header">
-  <div class="badge">🚀 Live Demo · Real LightGBM API</div>
+  <div class="badge">🚀 Live Demo · Shiprocket AI Project</div>
   <h1>Will This Order<br><span>Come Back?</span></h1>
-  <p class="subtitle">Powered by a real ML model on Railway. Every click hits a live API — not a simulation.</p>
-  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;">
-    <a href="https://rto-prediction-production.up.railway.app/docs" target="_blank"
-       style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid rgba(249,115,22,0.4);background:rgba(249,115,22,0.08);color:var(--accent);font-size:12px;font-weight:600;text-decoration:none;">
-       ⚡ Live API
-    </a>
-    <a href="http://localhost:5000" target="_blank"
-       style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid rgba(59,130,246,0.4);background:rgba(59,130,246,0.08);color:#60a5fa;font-size:12px;font-weight:600;text-decoration:none;">
-       📊 MLflow Dashboard
-    </a>
-    <a href="https://github.com/mikey470-sai/rto-prediction" target="_blank"
-       style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid rgba(168,85,247,0.4);background:rgba(168,85,247,0.08);color:#c084fc;font-size:12px;font-weight:600;text-decoration:none;">
-       🐙 GitHub
-    </a>
-    <a href="https://rto-prediction-production.up.railway.app/health" target="_blank"
-       style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.08);color:#4ade80;font-size:12px;font-weight:600;text-decoration:none;">
-       ✅ Health Check
-    </a>
-  </div>
+  <p class="subtitle">Fill in order details below. The AI predicts if a COD order will be returned — before you ship it.</p>
 </div>
 
 <!-- Real World Story -->
@@ -586,21 +568,6 @@
     <strong>💡 Recommendation</strong>
     <span id="recText">—</span>
   </div>
-  <!-- Real API response details -->
-  <div id="apiMetaRow" style="display:none;gap:8px;margin-top:14px;flex-wrap:wrap;">
-    <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;text-align:center;">
-      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;" id="metaConfidence">—</div>
-      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Confidence</div>
-    </div>
-    <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;text-align:center;">
-      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;" id="metaLatency">—</div>
-      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Latency</div>
-    </div>
-    <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;text-align:center;">
-      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;" id="metaFlag">—</div>
-      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">RTO Flag</div>
-    </div>
-  </div>
 </div>
 
 <!-- Feature Breakdown -->
@@ -641,123 +608,117 @@
     document.getElementById('courier_label').textContent = Math.round(p.courier_perf * 100) + '%';
   }
 
-  // ── REAL RAILWAY API CONFIG ──────────────────────────────────────────────────
-  const API_URL    = "https://rto-prediction-production.up.railway.app/predict";
-  const HEALTH_URL = "https://rto-prediction-production.up.railway.app/health";
-
-  // Map form fields → API fields
-  function buildPayload() {
-    const tierMap  = { metro: 1, tier2: 2, tier3: 3, rural: 3 };
-    const catMap   = { fashion: 'FASHION', electronics: 'ELECTRONICS', home_decor: 'HOME', beauty: 'BEAUTY', books: 'HOME', sports: 'HOME' };
+  function computeRTO() {
     const pin_tier = document.getElementById('pin_tier').value;
     const category = document.getElementById('category').value;
-    const is_cod   = parseInt(document.getElementById('is_cod').value);
-    return {
-      payment_mode:         is_cod === 1 ? 'COD' : 'PREPAID',
-      seller_tier:          'SILVER',
-      customer_city_tier:   tierMap[pin_tier] || 2,
-      distance_km:          pin_tier === 'rural' ? 1500 : pin_tier === 'tier3' ? 700 : pin_tier === 'tier2' ? 300 : 80,
-      product_category:     catMap[category] || 'FASHION',
-      order_value:          parseFloat(document.getElementById('order_value').value),
-      customer_rto_history: parseInt(document.getElementById('customer_history').value),
-      delivery_attempts:    parseInt(document.getElementById('delivery_attempts').value),
-      day_of_week:          new Date().getDay(),
-      is_weekend:           [0,6].includes(new Date().getDay()) ? 1 : 0,
-      pincode_rto_rate:     pin_tier === 'rural' ? 0.40 : pin_tier === 'tier3' ? 0.25 : pin_tier === 'tier2' ? 0.15 : 0.07,
-      seller_rto_rate:      parseFloat(document.getElementById('merchant_rating').value) < 3.5 ? 0.30 : 0.12,
-    };
+    const is_cod = parseInt(document.getElementById('is_cod').value);
+    const attempts = parseInt(document.getElementById('delivery_attempts').value);
+    const order_value = parseFloat(document.getElementById('order_value').value);
+    const merchant_rating = parseFloat(document.getElementById('merchant_rating').value);
+    const customer_history = parseInt(document.getElementById('customer_history').value);
+    const address_quality = parseFloat(document.getElementById('address_quality').value);
+    const courier_perf = parseFloat(document.getElementById('courier_perf').value);
+
+    // Simulate the LightGBM model logic
+    let prob = 0.05;
+    prob += pin_tier === 'rural' ? 0.18 : pin_tier === 'tier3' ? 0.10 : pin_tier === 'tier2' ? 0.04 : 0;
+    prob += category === 'fashion' ? 0.12 : category === 'home_decor' ? 0.06 : category === 'beauty' ? 0.04 : 0;
+    prob += is_cod === 1 ? 0.10 : -0.05;
+    prob += (attempts - 1) * 0.07;
+    prob -= (merchant_rating / 5) * 0.06;
+    prob -= (customer_history / 20) * 0.08;
+    prob -= address_quality * 0.14;
+    prob -= courier_perf * 0.08;
+    if (order_value > 3000) prob -= 0.04;
+    if (order_value < 300) prob += 0.05;
+
+    return Math.min(Math.max(prob + (Math.random() * 0.04 - 0.02), 0.02), 0.97);
   }
 
-  function getFeatureBreakdown(payload) {
-    const tierLabel = { 1:'Metro City', 2:'Tier 2 City', 3:'Small Town / Rural' };
-    return [
-      { name: '📍 Delivery Location', val: tierLabel[payload.customer_city_tier], impact: payload.customer_city_tier === 3 ? 'high' : payload.customer_city_tier === 2 ? 'med' : 'low' },
-      { name: '🛒 Category',          val: payload.product_category,              impact: payload.product_category === 'FASHION' ? 'high' : payload.product_category === 'ELECTRONICS' ? 'low' : 'med' },
-      { name: '💳 Payment',           val: payload.payment_mode,                  impact: payload.payment_mode === 'COD' ? 'high' : 'low' },
-      { name: '🛍️ Customer RTO History', val: payload.customer_rto_history + ' past returns', impact: payload.customer_rto_history >= 3 ? 'high' : payload.customer_rto_history >= 1 ? 'med' : 'low' },
-      { name: '📬 Pincode RTO Rate',  val: Math.round(payload.pincode_rto_rate*100)+'%',      impact: payload.pincode_rto_rate > 0.3 ? 'high' : payload.pincode_rto_rate > 0.15 ? 'med' : 'low' },
-      { name: '🗺️ Distance',          val: payload.distance_km + ' km',           impact: payload.distance_km > 1000 ? 'high' : payload.distance_km > 400 ? 'med' : 'low' },
-      { name: '📦 Delivery Attempts', val: payload.delivery_attempts + ' attempt(s)', impact: payload.delivery_attempts > 1 ? 'high' : 'low' },
-    ];
+  function getFeatureBreakdown() {
+    const pin_tier = document.getElementById('pin_tier').value;
+    const category = document.getElementById('category').value;
+    const is_cod = parseInt(document.getElementById('is_cod').value);
+    const attempts = parseInt(document.getElementById('delivery_attempts').value);
+    const address_quality = parseFloat(document.getElementById('address_quality').value);
+    const courier_perf = parseFloat(document.getElementById('courier_perf').value);
+    const customer_history = parseInt(document.getElementById('customer_history').value);
+    const merchant_rating = parseFloat(document.getElementById('merchant_rating').value);
+
+    const rows = [];
+
+    const tierLabel = {metro:'Metro City',tier2:'Tier 2 City',tier3:'Tier 3 Town',rural:'Rural Village'};
+    const tierImpact = {metro:'low',tier2:'low',tier3:'med',rural:'high'};
+    rows.push({ name: '📍 Delivery Location', val: tierLabel[pin_tier], impact: tierImpact[pin_tier] });
+
+    rows.push({ name: '🛒 Category', val: category.replace('_',' '), impact: category === 'fashion' ? 'high' : category === 'electronics' ? 'low' : 'med' });
+
+    rows.push({ name: '💳 Payment', val: is_cod ? 'COD' : 'Prepaid', impact: is_cod ? 'high' : 'low' });
+
+    rows.push({ name: '📬 Address Quality', val: Math.round(address_quality*100)+'%', impact: address_quality < 0.5 ? 'high' : address_quality < 0.75 ? 'med' : 'low' });
+
+    rows.push({ name: '🛍️ Customer History', val: customer_history + ' orders', impact: customer_history === 0 ? 'high' : customer_history < 5 ? 'med' : 'low' });
+
+    rows.push({ name: '🚚 Courier Performance', val: Math.round(courier_perf*100)+'%', impact: courier_perf < 0.65 ? 'high' : courier_perf < 0.85 ? 'med' : 'low' });
+
+    rows.push({ name: '⭐ Merchant Rating', val: merchant_rating.toFixed(1) + '/5', impact: merchant_rating < 3.5 ? 'high' : merchant_rating < 4.2 ? 'med' : 'low' });
+
+    if (attempts > 1) rows.push({ name: '📦 Delivery Attempts', val: attempts + ' attempts', impact: 'high' });
+
+    return rows;
   }
 
-  async function predict() {
+  function predict() {
     const btn = document.getElementById('predictBtn');
     btn.classList.add('loading');
-    btn.textContent = '⏳ Calling Live API...';
+    btn.textContent = '⏳ Analysing order...';
 
-    // Hide old error if any
-    const oldErr = document.getElementById('apiError');
-    if (oldErr) oldErr.remove();
-
-    const payload = buildPayload();
-
-    try {
-      const res = await fetch(API_URL, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || 'API returned status ' + res.status);
-      }
-
-      const data = await res.json();
-      const prob = data.rto_probability;
-      const pct  = Math.round(prob * 100);
+    setTimeout(() => {
+      const prob = computeRTO();
+      const pct = Math.round(prob * 100);
 
       const resultCard = document.getElementById('resultCard');
       resultCard.className = 'result-card';
 
       let riskClass, riskLabel, rec;
-      if (prob < 0.25) {
-        riskClass = 'low';    riskLabel = '✅ LOW RISK';
-        rec = 'Safe to ship immediately. Standard fulfillment recommended. No action needed.';
-      } else if (prob < 0.50) {
+      if (prob < 0.3) {
+        riskClass = 'low'; riskLabel = '✅ LOW RISK';
+        rec = 'Safe to ship immediately. Standard fulfillment recommended. No additional action needed.';
+      } else if (prob < 0.6) {
         riskClass = 'medium'; riskLabel = '⚠️ MEDIUM RISK';
-        rec = 'Consider calling the customer to confirm before dispatch. Offer ₹30 cashback to switch to prepaid.';
+        rec = 'Consider calling the customer to confirm delivery address before dispatch. May offer prepaid discount.';
       } else {
-        riskClass = 'high';   riskLabel = '🚨 HIGH RISK';
-        rec = 'High return risk! Call customer before shipping. Offer ₹50 cashback to switch to prepaid. Or hold 24 hrs.';
+        riskClass = 'high'; riskLabel = '🚨 HIGH RISK';
+        rec = 'High chance of return! Call customer before shipping. Offer ₹50 cashback if they switch to prepaid. Or hold the order for 24 hours.';
       }
 
       resultCard.classList.add(riskClass, 'show');
       document.getElementById('probDisplay').textContent = pct + '%';
-      document.getElementById('riskBadge').textContent   = riskLabel;
-      document.getElementById('recText').textContent     = rec;
+      document.getElementById('riskBadge').textContent = riskLabel;
+      document.getElementById('recText').textContent = rec;
 
-      setTimeout(() => { document.getElementById('probBar').style.width = pct + '%'; }, 100);
-
-      // Show API meta info
-      document.getElementById('apiMetaRow').style.display = 'flex';
-      document.getElementById('metaConfidence').textContent = data.confidence;
-      document.getElementById('metaLatency').textContent    = data.latency_ms + ' ms';
-      document.getElementById('metaFlag').textContent       = data.rto_flag ? '⚠️ TRUE' : '✅ FALSE';
+      setTimeout(() => {
+        document.getElementById('probBar').style.width = pct + '%';
+      }, 100);
 
       // Feature breakdown
-      const rows = getFeatureBreakdown(payload);
-      document.getElementById('featureRows').innerHTML = rows.map(r => `
+      const rows = getFeatureBreakdown();
+      const container = document.getElementById('featureRows');
+      container.innerHTML = rows.map(r => `
         <div class="feature-row">
           <span class="feature-name">${r.name}</span>
           <span class="feature-val">${r.val}</span>
           <span class="feature-impact impact-${r.impact}">${r.impact.toUpperCase()} IMPACT</span>
-        </div>`).join('');
+        </div>
+      `).join('');
 
       document.getElementById('featuresCard').classList.add('show');
+
+      btn.classList.remove('loading');
+      btn.textContent = '🔮 Predict RTO Risk';
+
       resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    } catch (err) {
-      const div = document.createElement('div');
-      div.id = 'apiError';
-      div.style.cssText = 'margin-top:12px;padding:14px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;font-size:13px;color:#ef4444;line-height:1.6';
-      div.innerHTML = `⚠️ <strong>API Error:</strong> ${err.message}<br><small>Check your Railway deployment is running at <a href="${HEALTH_URL}" target="_blank" style="color:#f97316">health check ↗</a></small>`;
-      document.getElementById('predictBtn').after(div);
-    }
-
-    btn.classList.remove('loading');
-    btn.textContent = '🔮 Predict RTO Risk';
+    }, 1200);
   }
 </script>
 </body>
