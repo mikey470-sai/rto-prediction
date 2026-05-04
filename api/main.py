@@ -4,6 +4,7 @@ Endpoints: POST /predict  |  GET /health  |  GET /metrics
 """
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator
 import joblib
 import numpy as np
@@ -16,6 +17,13 @@ app = FastAPI(
     title="RTO Prediction Engine",
     description="Predicts Return-to-Origin probability for e-commerce shipments.",
     version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 MODEL_PATH   = os.getenv("MODEL_PATH",   "models/artifacts/lgbm_model.pkl")
